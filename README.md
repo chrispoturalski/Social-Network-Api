@@ -14,7 +14,11 @@
 
 Github Repo: https://github.com/chrispoturalski/Social-Network-Api
 
+Walkthough Part 1: https://drive.google.com/file/d/10vhNFfbVUOzNAKCJKd1-55ggSBbqXfMd/view
 
+(Video got cut off for deleting reaction on a thought)
+
+Walkthough Part 2: 
 
 ## Description
 

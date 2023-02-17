@@ -18,7 +18,7 @@ Walkthough Part 1: https://drive.google.com/file/d/10vhNFfbVUOzNAKCJKd1-55ggSBbq
 
 (Video got cut off for deleting reaction on a thought)
 
-Walkthough Part 2: 
+Walkthough Part 2: https://drive.google.com/file/d/1s_F75y-wXH0Fq6eF0xDk_oOuUjpUTBM2/view
 
 ## Description
 

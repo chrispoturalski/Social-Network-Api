@@ -6,6 +6,7 @@ const {User} = require("../../models")
 router.get('/', (req,res)=> {
     User.find({}, (err, users) => {
         res.status(200).json(users)
+        console.log(err)
     });
 });
 
@@ -68,13 +69,35 @@ router.delete('/:userId', (req,res)=> {
 });
 
 //TODO - ROUTE THAT ADDS A FRIEND TO A USER
-router.put('/:userId/friends/:friendId', (req,res)=> {
+router.put('/:userId/friends/:friendId', async (req,res)=> {
+    await User.findByIdAndUpdate(req.params.userId, 
+        {
+            $push: {friends: req.params.friendId}
+        }
+    )
+    await User.findByIdAndUpdate(req.params.friendId, 
+        {
+            $push: {friends: req.params.userId}
+        },
+        
+    ); res.status(200).json("Friend added")
 
 })
 
 //TODO - ROUTE THAT DELETES A FRIEND FROM A USER'S FRIENDS, DONT DELETE THE FRIEND AS A USER THOUGH!
-router.delete('/:userId/friends/:friendId', (req,res)=> {
-  
+router.delete('/:userId/friends/:friendId', async (req,res)=> {
+    await User.findByIdAndUpdate(req.params.userId, 
+        {
+            $pull: {friends: req.params.friendId}
+        }
+    )
+    await User.findByIdAndUpdate(req.params.friendId, 
+        {
+            $pull: {friends: req.params.userId}
+        },
+        
+    ); res.status(200).json("Friend deleted")
+
 });
 
 module.exports = router;

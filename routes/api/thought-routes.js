@@ -6,6 +6,9 @@ const { Thought, Reaction} = require('../../models')
 router.get('/', (req,res)=> {
     Thought.find({}, (err, thoughts) => {
         res.status(200).json(thoughts)
+    }).populate({
+        path: 'reactions',
+        select: '-__v'
     });
 })
 
@@ -16,11 +19,11 @@ router.post('/', (req,res)=> {
             thoughtText: req.body.thoughtText,
             username: req.body.username
         },
-        (err, thought) => {
+        (err, thoughts) => {
             if (err) {
                 res.status(500).json(err);
             } else {
-                res.status(200).json(thought);
+                res.status(200).json(thoughts);
             }
         }   
     )
@@ -28,28 +31,28 @@ router.post('/', (req,res)=> {
 
 //TODO: ROUTE TO GET SINGLE THOUGHT BASED ON THOUGHT ID
 router.get('/:thoughtId', (req,res)=> {
-    Thought.findById(req.params.thoughtId, (err, thought) => {
+    Thought.findById(req.params.thoughtId, (err, thoughts) => {
         if (err) {
             res.status(500).json("No thought found");
         } else {
-            res.status(200).json(thought);
+            res.status(200).json(thoughts);
         }
     }
     )
 })
 
 //TODO: ROUTE TO UPDATE A THOUGHT
-router.put('/', (req,res)=> {
+router.put('/:thoughtId', (req,res)=> {
     Thought.findByIdAndUpdate(req.params.thoughtId, 
         {
             thoughtText: req.body.thoughtText,
             username: req.body.username
         },
-        (err, thought) => {
+        (err, thoughts) => {
             if (err) {
                 res.status(500).json("No thought found");
             } else {
-                res.status(200).json(thought);
+                res.status(200).json(thoughts);
             }
         }
     )
@@ -57,61 +60,53 @@ router.put('/', (req,res)=> {
 
 //TODO: ROUTE TO DELETE A THOUGHT BASED ON THOUGHT ID
 router.delete('/:thoughtId', (req,res)=> {
-    Thought.findByIdAndDelete(req.params.thoughtId, (err, thought) => {
+    Thought.findByIdAndDelete(req.params.thoughtId, (err, thoughts) => {
         if (err) {
             res.status(500).json("No thought found");
         } else {
-            res.status(200).json(thought);
+            res.status(200).json(thoughts);
         }
     })
 });
 
+
+
+
 //TODO: ROUTE TO ADD REACTION TO A THOUGHT
-router.post('/:thoughtId/reactions', (req,res)=> {
-    Thought.findByIdAndUpdate(req.params.thoughtId, 
+router.post('/:thoughtId/reactions', async (req,res)=> {
+    const reaction = await Reaction.create(
         {
-            $push: {
-                reactions: {
-                    reactionId: req.body.reactionId,
-                    reactionBody: req.body.reactionBody,
-                    username: req.body.username
-                }
-            }
+            reactionBody: req.body.reactionBody,
+            username: req.body.username
         },
-        {
-            new: true
-        },
-        (err, thought) => {
-            if (err) {
-                res.status(500).json("No thought found");
-            } else {
-                res.status(200).json(thought);
-            }
-        }
     )
-});
+    Thought.findOneAndUpdate(
+        { _id: req.params.thoughtId },
+        { $addToSet: { reactions: reaction._id } },
+        { new: true, runValidators: true }
+    )
+    .then((thoughts) => 
+        !thoughts
+        ? res.status(404).json({ message: 'No thought found with this id!' })
+        : res.json(thoughts)
+    )
+    .catch((err) => res.status(500).json(err));
+});     
 
 //TODO: ROUTE TO DELETE A REACTION ON A THOUGHT
-router.delete('/:thoughtId/reactions/:reactionId', (req,res)=> {
-    Thought.findByIdAndUpdate(req.params.thoughtId, 
-        {
-            $pull: {
-                reactions: {
-                    reactionId: req.params.reactionId
-                }
-            }
-        },
-        {
-            new: true
-        },
-        (err, thought) => {
-            if (err) {
-                res.status(500).json("No thought found");
-            } else {
-                res.status(200).json(thought);
-            }
-        }
-    )
-})
+//router.delete('/:thoughtId/reactions/:reactionId', (req,res)=> {
+//     Thought.findByOneAndUpdate(req.params.thoughtId,
+//         {
+//             $pull: { reactions: {reactionId: req.params.reactionId} }
+//         },
+//         (err, thoughts) => {
+//             if (err) {
+//                 res.status(500).json("No thought found");
+//             } else {
+//                 res.status(200).json(thoughts);
+//             }
+//         }
+//     )
+// });
 
 module.exports = router;

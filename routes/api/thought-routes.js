@@ -94,19 +94,19 @@ router.post('/:thoughtId/reactions', async (req,res)=> {
 });     
 
 //TODO: ROUTE TO DELETE A REACTION ON A THOUGHT
-//router.delete('/:thoughtId/reactions/:reactionId', (req,res)=> {
-//     Thought.findByOneAndUpdate(req.params.thoughtId,
-//         {
-//             $pull: { reactions: {reactionId: req.params.reactionId} }
-//         },
-//         (err, thoughts) => {
-//             if (err) {
-//                 res.status(500).json("No thought found");
-//             } else {
-//                 res.status(200).json(thoughts);
-//             }
-//         }
-//     )
-// });
+router.delete('/:thoughtId/reactions/:reactionId',  (req,res)=> {
+    Thought.findOneAndUpdate(
+        { _id: req.params.thoughtId },
+        { $pull: { reactions: req.params.reactionId } },
+        { runValidators: true, new: true }
+        )
+        .then((thoughts) =>
+            !thoughts
+            ? res.status(404).json({ message: 'No thought with this id!' })
+            : res.json(thoughts)
+        )
+        .catch((err) => res.status(500).json(err));
+        },
+);
 
 module.exports = router;
